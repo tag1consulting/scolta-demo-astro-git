@@ -2,7 +2,8 @@ name: gitmastery-astro
 type: generic
 docroot: ""
 webserver_type: generic
-nodejs_version: "20"
+# astro@6 refuses to build/run on anything below Node 22.12.
+nodejs_version: "22"
 omit_containers: [db]
 corepack_enable: false
 use_dns_when_possible: true
