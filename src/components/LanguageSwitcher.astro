@@ -1,0 +1,72 @@
+---
+/**
+ * Header language switcher (parity with the Django/Drupal `.language-switcher`).
+ * Derives per-language URLs from the current path: EN at /<slug>/, translations
+ * at /<lang>/<slug>/. Translation links are shown only for translatable doc
+ * pages (the About/home pages exist in English only). Collapses to a trigger
+ * button on narrow viewports — the open/close behavior is a small client
+ * script, the Astro port of theme/js/lang-switcher.js.
+ */
+interface Props {
+  translatable: string[];
+}
+
+const { translatable } = Astro.props;
+
+const LANGS = ["en", "de", "es", "fr", "it"] as const;
+const TRANSLATION_LANGS = new Set(["es", "fr", "it", "de"]);
+
+const segments = Astro.url.pathname.replace(/^\/|\/$/g, "").split("/").filter(Boolean);
+const parsed =
+  segments.length > 0 && TRANSLATION_LANGS.has(segments[0])
+    ? { lang: segments[0], slug: segments.slice(1).join("/") }
+    : { lang: "en", slug: segments.join("/") };
+
+const hasTranslations = parsed.slug !== "" && translatable.includes(parsed.slug);
+const langs: readonly string[] = hasTranslations ? LANGS : ["en"];
+
+function urlFor(code: string): string {
+  return code === "en" ? `/${parsed.slug}/` : `/${code}/${parsed.slug}/`;
+}
+---
+
+<nav class="language-switcher" aria-label="Language">
+  <button type="button" class="lang-trigger" aria-expanded="false">
+    {parsed.lang.toUpperCase()}
+  </button>
+  <ul class="language-switcher__list">
+    {
+      langs.map((code) => (
+        <li class:list={[{ "is-active": code === parsed.lang }]}>
+          <a href={urlFor(code)} hreflang={code} aria-current={code === parsed.lang ? "true" : undefined}>
+            {code.toUpperCase()}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<script>
+  // Open/close behavior for the collapsed (narrow-viewport) switcher: toggle on
+  // the trigger, close on outside click or Escape.
+  for (const root of document.querySelectorAll<HTMLElement>(".language-switcher")) {
+    const trigger = root.querySelector<HTMLButtonElement>(".lang-trigger");
+    if (!trigger) continue;
+    const close = () => {
+      root.classList.remove("is-open");
+      trigger.setAttribute("aria-expanded", "false");
+    };
+    trigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = root.classList.toggle("is-open");
+      trigger.setAttribute("aria-expanded", String(open));
+    });
+    document.addEventListener("click", (e) => {
+      if (!root.contains(e.target as Node)) close();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
+  }
+</script>

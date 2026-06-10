@@ -1,0 +1,44 @@
+---
+// Catch-all doc page: resolves both /<slug>/ (EN) and /<lang>/<slug>/
+// (translations) from the build-time content manifest — no request-time
+// filesystem read, so every doc page resolves regardless of the server
+// process's working directory.
+import Layout from "../layouts/Layout.astro";
+import { manifestPageBySlugSegments } from "../../lib/manifest.js";
+
+const segments = (Astro.params.slug ?? "").split("/").filter(Boolean);
+const page = manifestPageBySlugSegments(segments);
+
+// Unknown slug -> 404 (parity with the Next/Nuxt/Drupal/Django demos): render
+// the not-found article under a 404 response status instead of a blank 200.
+if (!page) Astro.response.status = 404;
+
+const showMeta = page && page.type !== "about" && Boolean(page.section || page.difficulty || page.gitVersion);
+---
+
+{
+  page ? (
+    <Layout title={`${page.title} — GitMastery`} lang={page.language}>
+      <article class:list={["prose", page.type]} lang={page.language}>
+        <h1>{page.title}</h1>
+        {showMeta && (
+          <div class="doc-meta">
+            {page.section && <span class="badge badge--section">{page.section}</span>}
+            {page.difficulty && <span class="badge badge--difficulty">{page.difficulty}</span>}
+            {page.gitVersion && <span class="badge badge--version">Git {page.gitVersion}</span>}
+          </div>
+        )}
+        <div set:html={page.body} />
+      </article>
+    </Layout>
+  ) : (
+    <Layout title="Page not found — GitMastery">
+      <article class="prose">
+        <h1>Page not found</h1>
+        <p>
+          The page you requested does not exist. <a href="/">Back to the home page</a>.
+        </p>
+      </article>
+    </Layout>
+  )
+}

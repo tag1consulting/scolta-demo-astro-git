@@ -1,0 +1,51 @@
+name: gitmastery-astro
+type: generic
+docroot: ""
+webserver_type: generic
+nodejs_version: "20"
+omit_containers: [db]
+corepack_enable: false
+use_dns_when_possible: true
+# The scolta-astro + scolta packages are mounted from the monorepo at
+# /var/packages (see docker-compose.packages.yaml); the `file:../../packages/*`
+# deps in package.json resolve there. node_modules is a container-only named
+# volume (docker-compose.nodemodules.yaml) so the host's macOS install never
+# leaks into the Linux container.
+# NODE_ENV is intentionally NOT pinned to development: `astro build` and the
+# node adapter default to production on their own, and leaving it unset keeps
+# `npm install` installing the devDependencies (tsx, typescript) the build needs.
+# First-start: install the demo, then build a real production bundle. `npm run
+# build` runs `prebuild` (gen:content → the build-time content manifest),
+# `astro build` (the node-server output bundles that manifest), then `postbuild`
+# (scolta:assets → public/scolta, scolta:build → the Pagefind index in
+# public/pagefind, sync-static → both copied into dist/client, which is the only
+# dir the @astrojs/node adapter serves statics from). Mirrors the Nuxt demo.
+hooks:
+  post-start:
+    - exec: |
+        set -e
+        cd /var/www/html
+        # The node_modules named volume mounts root-owned; hand it to the web user.
+        sudo chown -R "$(id -u):$(id -g)" /var/www/html/node_modules
+        # Clear the readiness sentinel + previous build FIRST, so the daemon
+        # blocks until THIS build fully completes (the server entry can land
+        # before all of its chunks, so waiting on entry.mjs alone could start
+        # node against a half-written dist → ERR_MODULE_NOT_FOUND).
+        rm -f .build-ready
+        rm -rf dist
+        npm install --legacy-peer-deps --no-audit --no-fund
+        npm run build
+        # Touch the sentinel only after a complete, successful build (set -e).
+        touch .build-ready
+# Astro production server (@astrojs/node standalone; the scolta-astro
+# integration injects the AI routes), serving the build produced above. Waits
+# for the post-start readiness sentinel AND the server bundle before starting.
+web_extra_daemons:
+  - name: "astro"
+    command: "bash -lc 'cd /var/www/html; while [ ! -f .build-ready ] || [ ! -f dist/server/entry.mjs ]; do sleep 2; done; exec env HOST=0.0.0.0 PORT=3000 node dist/server/entry.mjs'"
+    directory: /var/www/html
+web_extra_exposed_ports:
+  - name: "astro"
+    container_port: 3000
+    http_port: 80
+    https_port: 443

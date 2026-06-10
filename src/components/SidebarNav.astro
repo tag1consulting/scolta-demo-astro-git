@@ -1,0 +1,36 @@
+---
+/**
+ * Documentation section nav (parity with the Django `.sidebar` / `section_nav`).
+ * Collapsible <details> per section; the section containing the active page (and
+ * the first section) start open, and the active page link is highlighted.
+ */
+import type { NavSection } from "../../lib/content.js";
+
+interface Props {
+  sections: NavSection[];
+}
+
+const { sections } = Astro.props;
+
+function norm(p: string): string {
+  return ("/" + p.replace(/^\/|\/$/g, "") + "/").replace(/\/+/g, "/");
+}
+const current = norm(Astro.url.pathname);
+---
+
+<aside class="sidebar" aria-label="Documentation sections">
+  {
+    sections.map((s, i) => (
+      <details class="nav-section" open={i === 0 || s.pages.some((p) => norm(p.url) === current)}>
+        <summary>{s.section}</summary>
+        <ul>
+          {s.pages.map((p) => (
+            <li class:list={[{ "is-active": norm(p.url) === current }]}>
+              <a href={p.url}>{p.title}</a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    ))
+  }
+</aside>

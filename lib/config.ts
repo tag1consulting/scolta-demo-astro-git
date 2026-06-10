@@ -1,0 +1,38 @@
+/**
+ * Scolta configuration for the GitMastery (Astro) demo — feature-parity with the
+ * Drupal, Django, Next.js, and Nuxt demos: the `reference` preset, five AI
+ * languages, and section / difficulty / language facet filters. Also passed to
+ * the scolta-astro integration via `astro.config.mjs`.
+ */
+
+import { AstroScoltaConfig, type AstroScoltaConfigInit } from "scolta-astro/core";
+
+export const scoltaConfigInit: AstroScoltaConfigInit = {
+  source: "content",
+  site_name: "GitMastery",
+  site_description: "Git documentation reference",
+  preset: "reference",
+  // Auto-enable Scolta AI with no key: provision a free Amazee.ai LiteLLM trial
+  // on first use (parity with the Drupal/Django demos). Override with an
+  // explicit provider/key via SCOLTA_AI_PROVIDER + SCOLTA_API_KEY (env wins).
+  ai_provider: "amazee",
+  ai_languages: ["en", "es", "fr", "it", "de"],
+  filter_fields: ["section", "difficulty", "language"],
+  filter_field_descriptions: {
+    section: "Documentation section (Getting Started, Core Concepts, Advanced Workflows, Comparisons, Tips)",
+    difficulty: "Difficulty level (Beginner, Intermediate, Advanced)",
+    language: "Content language (en, es, fr, it, de)",
+  },
+  // Lock search results to the active page's language (parity with the Drupal
+  // and Django demos); scolta.js reads the language from window.scolta.currentLanguage.
+  auto_language_filter: true,
+  results_per_page: 12,
+  // Content mode: write the index into public/ so it serves at /pagefind.
+  stateDir: ".scolta",
+  outputDir: "public",
+  assetsPublicPath: "/scolta",
+};
+
+export function getConfig(): AstroScoltaConfig {
+  return AstroScoltaConfig.fromEnv(scoltaConfigInit);
+}

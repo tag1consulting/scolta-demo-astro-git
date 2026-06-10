@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+.build-ready
+public/pagefind/
+public/scolta/
+.scolta/
+lib/content-manifest.ts
+coverage/
+*.tsbuildinfo
+.DS_Store

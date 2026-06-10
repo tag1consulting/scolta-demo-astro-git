@@ -1,0 +1,77 @@
+---
+/**
+ * Global chrome — the Astro port of the Nuxt demo's app.vue: sticky header with
+ * brand + search + language switcher, sidebar section nav, footer. The search
+ * widget lives in the header on every page (parity with the Drupal/Django
+ * demos); the active content language is derived from the URL (EN at /<slug>/,
+ * translations at /<lang>/<slug>/) and injected as `currentLanguage` so
+ * scolta.js locks results + AI to the page's language (auto_language_filter).
+ */
+import "../styles/gitmastery.css";
+import ScoltaSearch from "scolta-astro/ScoltaSearch.astro";
+import SidebarNav from "../components/SidebarNav.astro";
+import LanguageSwitcher from "../components/LanguageSwitcher.astro";
+import { manifestNav, manifestTranslatable } from "../../lib/manifest.js";
+import { getConfig } from "../../lib/config.js";
+
+interface Props {
+  title?: string;
+  lang?: string;
+}
+
+const { title = "GitMastery", lang = "en" } = Astro.props;
+
+const TRANSLATION_LANGS = new Set(["es", "fr", "it", "de"]);
+const firstSegment = Astro.url.pathname.replace(/^\/|\/$/g, "").split("/").filter(Boolean)[0];
+const currentLanguage = firstSegment && TRANSLATION_LANGS.has(firstSegment) ? firstSegment : "en";
+
+// SAVED browser config for the header search widget, resolved server-side only:
+// getConfig() pulls in the `scolta` binding (node:crypto, node:fs), which never
+// reaches the client — the component serializes the result into window.scolta.
+const searchConfig = { ...getConfig().toBrowserConfig(), currentLanguage };
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="site-brand" href="/">
+          <span class="site-brand__mark">⎇</span>
+          <span class="site-brand__name">GitMastery</span>
+        </a>
+        <div class="site-search">
+          <ScoltaSearch config={searchConfig} assetsPath="/scolta" pagefindPath="/pagefind/pagefind.js" />
+        </div>
+        <LanguageSwitcher translatable={manifestTranslatable()} />
+      </div>
+    </header>
+
+    <div class="layout">
+      <SidebarNav sections={manifestNav()} />
+      <main id="main" class="content">
+        <slot />
+      </main>
+    </div>
+
+    <footer class="site-footer">
+      <p>
+        GitMastery is a fictional demo by <a href="https://tag1.com">Tag1 Consulting</a>,
+        showcasing <a href="https://tag1.com/scolta">Scolta</a> AI search on Astro.
+      </p>
+    </footer>
+  </body>
+</html>
