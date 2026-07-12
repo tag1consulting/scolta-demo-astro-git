@@ -26,8 +26,8 @@
     "@types/js-yaml": "^4.0.9",
     "astro": "^6.4.5",
     "js-yaml": "^4.2.0",
-    "scolta": "file:../../packages/scolta-node",
-    "scolta-astro": "file:../../packages/scolta-astro"
+    "scolta": "^1.0.1",
+    "scolta-astro": "^1.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
