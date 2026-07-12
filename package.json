@@ -24,7 +24,7 @@
   "dependencies": {
     "@astrojs/node": "^10.1.4",
     "@types/js-yaml": "^4.0.9",
-    "astro": "^6.4.5",
+    "astro": "^6.4.8",
     "js-yaml": "^4.2.0",
     "scolta": "^1.0.1",
     "scolta-astro": "^1.0.0"
