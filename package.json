@@ -2,7 +2,7 @@
   "name": "git-manual-astro",
   "version": "1.0.0",
   "private": true,
-  "description": "GitMastery (Astro) — multilingual Git documentation demo for Scolta",
+  "description": "GitMastery (Astro) \u2014 multilingual Git documentation demo for Scolta",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -14,7 +14,7 @@
     "build": "astro build",
     "postbuild": "npm run scolta:assets && npm run scolta:build && node scripts/sync-static.mjs",
     "scolta:build": "npm run gen:content && tsx scripts/build-index.ts",
-    "scolta:assets": "scolta-build assets",
+    "scolta:assets": "scolta-build assets && tsx scripts/vendor-dev-bundle.ts",
     "pretest": "npm run gen:content",
     "test": "vitest run",
     "lint": "eslint .",
@@ -27,7 +27,8 @@
     "astro": "^6.4.5",
     "js-yaml": "^4.2.0",
     "scolta": "^1.0.1",
-    "scolta-astro": "^1.0.0"
+    "scolta-astro": "^1.0.0",
+    "scolta-dev-bundle": "github:tag1consulting/scolta-node#main"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

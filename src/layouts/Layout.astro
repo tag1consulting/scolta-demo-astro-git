@@ -55,6 +55,22 @@ const searchConfig = { ...getConfig().toBrowserConfig(), currentLanguage };
         </a>
         <div class="site-search">
           <ScoltaSearch config={searchConfig} assetsPath="/scolta" pagefindPath="/pagefind/pagefind.js" />
+          {/*
+            Theming for the result list and the search-as-you-type dropdown.
+
+            Immediately after the component on purpose, and not in <head>:
+            <ScoltaSearch /> emits its own <link> from right here, and ours has
+            to come second because it redeclares Scolta's documented custom
+            properties at the same specificity.
+
+            Served from public/ rather than imported, so nothing about that
+            ordering depends on how the bundler decides to emit it.
+
+            There is no result renderer alongside it. See the note in
+            scolta-search.css: on this build path a renderer has no per-item
+            data to render.
+          */}
+          <link rel="stylesheet" href="/scolta-search.css" />
         </div>
         <LanguageSwitcher translatable={manifestTranslatable()} />
       </div>
