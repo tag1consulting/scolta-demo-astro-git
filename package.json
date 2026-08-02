@@ -22,9 +22,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@astrojs/node": "^10.1.4",
+    "@astrojs/node": "^11.0.3",
     "@types/js-yaml": "^4.0.9",
-    "astro": "^6.4.5",
+    "astro": "^7.1.6",
     "js-yaml": "^4.2.0",
     "scolta": "^1.0.1",
     "scolta-astro": "^1.0.0",
