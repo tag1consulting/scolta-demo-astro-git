@@ -25,7 +25,7 @@
     "@astrojs/node": "^11.0.3",
     "@types/js-yaml": "^4.0.9",
     "astro": "^7.1.6",
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^4.3.2",
     "scolta": "^1.0.1",
     "scolta-astro": "^1.0.0",
     "scolta-dev-bundle": "github:tag1consulting/scolta-node#main"
